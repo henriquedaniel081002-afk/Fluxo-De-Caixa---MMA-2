@@ -1,591 +1,290 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fluxo de Caixa – Dashboard</title>
-  <style>
-    :root {
-      --bg-main: #050608;
-      --bg-panel: #111827;
-      --bg-panel-soft: #0b1018;
-      --accent: #f97316;
-      --accent-soft: #f973161a;
-      --accent-strong: #ea580c;
-      --text-main: #f9fafb;
-      --text-muted: #9ca3af;
-      --danger: #ef4444;
-      --border-soft: #1f2933;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fluxo de Caixa - Dashboard</title>
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
+<style>
     body {
-      min-height: 100vh;
-      background: #000;
-      color: var(--text-main);
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 16px;
-    }
-
-    .page {
-      width: 100%;
-      max-width: 1400px;
-      background: radial-gradient(circle at top, #020617 0, #020617 45%, #000 100%);
-      border-radius: 18px;
-      border: 1px solid #111827;
-      padding: 20px;
-      box-shadow: 0 26px 60px rgba(0,0,0,0.65);
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #0f172a;
+        color: #e5e7eb;
     }
 
     header {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 18px;
+        background: #1e293b;
+        padding: 20px;
+        text-align: center;
+        font-size: 26px;
+        font-weight: bold;
+        color: #f97316;
+        box-shadow: 0 0 15px #f9731633;
     }
 
-    header h1 {
-      font-size: 1.5rem;
-      letter-spacing: 0.04em;
+    .container {
+        max-width: 1200px;
+        margin: auto;
+        padding: 20px;
     }
 
-    header h1 span {
-      color: var(--accent);
-    }
-
-    .last-update {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      text-align: right;
-    }
-
-    /* Filtros */
-    .filters {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 12px;
-      margin-bottom: 18px;
-    }
-
-    .filter-group {
-      background: var(--bg-panel-soft);
-      border-radius: 12px;
-      border: 1px solid var(--border-soft);
-      padding: 10px 12px;
-    }
-
-    .filter-label {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-
-    select, input[type="date"] {
-      width: 100%;
-      padding: 8px 10px;
-      background: #020617;
-      border-radius: 8px;
-      border: 1px solid #1f2937;
-      color: var(--text-main);
-      font-size: 0.88rem;
-    }
-
-    .filter-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      justify-content: space-between;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: 1px solid transparent;
-      font-size: 0.86rem;
-      cursor: pointer;
-      background: var(--accent);
-      color: #000;
-      font-weight: 600;
-      transition: all 0.15s ease;
-      text-decoration: none;
-      text-align: center;
-      white-space: nowrap;
-    }
-
-    .btn:hover {
-      background: var(--accent-strong);
-      transform: translateY(-1px);
-      box-shadow: 0 0 20px var(--accent-soft);
-    }
-
-    .btn-secondary {
-      background: transparent;
-      color: var(--text-main);
-      border-color: #374151;
-    }
-
-    .btn-secondary:hover {
-      background: #111827;
-    }
-
-    .view-toggle {
-      display: inline-flex;
-      border-radius: 999px;
-      border: 1px solid #374151;
-      overflow: hidden;
-      align-self: flex-end;
-    }
-
-    .view-toggle button {
-      flex: 1;
-      padding: 6px 14px;
-      font-size: 0.82rem;
-      border: none;
-      background: transparent;
-      color: var(--text-muted);
-      cursor: pointer;
-    }
-
-    .view-toggle button.active {
-      background: var(--accent);
-      color: #000;
-      font-weight: 600;
-    }
-
-    /* Cards */
     .cards {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 12px;
-      margin-bottom: 18px;
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 30px;
     }
 
     .card {
-      background: linear-gradient(145deg, var(--bg-panel-soft), #020617);
-      border-radius: 16px;
-      padding: 14px 16px;
-      border: 1px solid rgba(55,65,81,0.9);
-      box-shadow: 0 18px 40px rgba(0,0,0,0.6);
+        background: #1e293b;
+        padding: 20px;
+        border-radius: 10px;
+        flex: 1;
+        min-width: 240px;
+        text-align: center;
+        box-shadow: 0 0 12px #00000055;
     }
 
-    .card-title {
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-muted);
-      margin-bottom: 4px;
+    .card h2 {
+        margin: 0;
+        font-size: 18px;
+        color: #f97316;
     }
 
-    .card-value {
-      font-size: 1.35rem;
-      font-weight: 700;
-    }
-
-    .card-value.danger {
-      color: var(--danger);
-    }
-
-    .card-sub {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      margin-top: 3px;
-    }
-
-    /* Conteúdo */
-    .content {
-      background: rgba(3,7,18,0.9);
-      border-radius: 16px;
-      border: 1px solid #111827;
-      padding: 14px;
-    }
-
-    .tab {
-      display: none;
-    }
-
-    .tab.active {
-      display: block;
-    }
-
-    /* Tabelas */
-    .tables-grid {
-      display: grid;
-      grid-template-columns: 1.1fr 1.2fr 1.2fr;
-      gap: 10px;
-    }
-
-    .table-card {
-      background: #020617;
-      border-radius: 12px;
-      border: 1px solid #111827;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .table-header {
-      padding: 8px 10px;
-      background: #0b1120;
-      border-bottom: 1px solid #111827;
-      font-size: 0.86rem;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
+    .card p {
+        margin: 10px 0 0 0;
+        font-size: 22px;
+        font-weight: bold;
     }
 
     table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.8rem;
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 40px;
     }
 
-    thead {
-      background: #020617;
-      position: sticky;
-      top: 0;
-      z-index: 1;
+    table th {
+        background: #f97316;
+        padding: 10px;
+        text-align: left;
+        font-size: 14px;
     }
 
-    th, td {
-      padding: 4px 8px;
-      border-bottom: 1px solid #111827;
-      text-align: left;
-      white-space: nowrap;
+    table td {
+        padding: 10px;
+        border-bottom: 1px solid #334155;
+        font-size: 14px;
     }
 
-    th {
-      color: var(--text-muted);
-      font-weight: 500;
-      font-size: 0.76rem;
+    td.text-right {
+        text-align: right;
     }
 
-    tbody {
-      display: block;
-      max-height: 270px;
-      overflow-y: auto;
+    .abas {
+        display: flex;
+        justify-content: center;
+        margin: 20px 0;
+        gap: 20px;
     }
 
-    thead tr, tbody tr {
-      display: table;
-      width: 100%;
-      table-layout: fixed;
+    .abas button {
+        padding: 10px 20px;
+        border: none;
+        background: #1e293b;
+        color: #e5e7eb;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.2s;
+        font-size: 15px;
     }
 
-    tbody tr:nth-child(even) {
-      background: #020617;
+    .abas button.active {
+        background: #f97316;
+        color: #000;
     }
 
-    .text-right {
-      text-align: right;
+    .graficos, .tabelas {
+        display: none;
     }
 
-    .saldo-negativo {
-      background: rgba(239,68,68,0.14) !important;
-      color: #fecaca;
-    }
-
-    /* Gráficos */
-    .charts-grid {
-      display: grid;
-      grid-template-columns: 1.4fr 1.1fr;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .chart-card {
-      background: #020617;
-      border-radius: 12px;
-      border: 1px solid #111827;
-      padding: 10px;
-      min-height: 340px;
-    }
-
-    .chart-title {
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
+    .graficos.active, .tabelas.active {
+        display: block;
     }
 
     canvas {
-      width: 100% !important;
-      height: auto !important;
-      aspect-ratio: 2 / 1;
+        background: #1e293b;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 40px;
+        box-shadow: 0 0 12px #00000055;
     }
 
-    /* Responsivo */
-    @media (max-width: 960px) {
-      .filters {
-        grid-template-columns: 1fr;
-      }
-
-      .cards {
-        grid-template-columns: 1fr;
-      }
-
-      .tables-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .charts-grid {
-        grid-template-columns: 1fr;
-      }
-
-      header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .view-toggle {
-        align-self: stretch;
-        width: 100%;
-      }
-    }
-  </style>
+</style>
 </head>
 <body>
-  <div class="page">
-    <header>
-      <div>
-        <h1>Fluxo de Caixa <span>– Dashboard</span></h1>
-      </div>
-      <div class="last-update">
-        Visualização • <strong id="viewLabel">Tabelas</strong><br/>
-        Atualizado em <span id="lastUpdate"></span>
-      </div>
-    </header>
 
-    <!-- Filtros (visuais por enquanto) -->
-    <section class="filters">
-      <div class="filter-group">
-        <div class="filter-label">Quinzena</div>
-        <select id="filterQuinzena">
-          <option value="todas">Todas</option>
-          <option value="1">1ª quinzena</option>
-          <option value="2">2ª quinzena</option>
-        </select>
-      </div>
+<header>Fluxo de Caixa • Dashboard Online</header>
 
-      <div class="filter-group">
-        <div class="filter-label">Data</div>
-        <input type="date" id="filterData">
-      </div>
+<div class="container">
 
-      <div class="filter-group filter-actions">
-        <button class="btn-secondary btn" id="btnLimpar">Limpar filtros</button>
-        <div class="view-toggle">
-          <button id="btnViewTabela" class="active">Tabelas</button>
-          <button id="btnViewGraficos">Gráficos</button>
+    <div class="cards">
+        <div class="card">
+            <h2>Total Recebimentos</h2>
+            <p id="cardReceber">R$ 0,00</p>
         </div>
-      </div>
-    </section>
+        <div class="card">
+            <h2>Total Pagamentos</h2>
+            <p id="cardPagar">R$ 0,00</p>
+        </div>
+        <div class="card">
+            <h2>Comprometimento</h2>
+            <p id="cardComprometimento">0%</p>
+        </div>
+    </div>
 
-    <!-- Cards -->
-    <section class="cards">
-      <article class="card">
-        <div class="card-title">Total a receber</div>
-        <div class="card-value" id="cardReceber">R$ 0,00</div>
-        <div class="card-sub">Somatório de todos os recebimentos previstos no período.</div>
-      </article>
-      <article class="card">
-        <div class="card-title">Comprometimento Caixa</div>
-        <div class="card-value" id="cardComprometimento">0,00%</div>
-        <div class="card-sub">Pagamentos / Recebimentos do período.</div>
-      </article>
-      <article class="card">
-        <div class="card-title">Total a pagar</div>
-        <div class="card-value danger" id="cardPagar">R$ 0,00</div>
-        <div class="card-sub">Somatório de todos os pagamentos previstos no período.</div>
-      </article>
-    </section>
+    <div class="abas">
+        <button id="btnViewTabela" class="active">Tabelas</button>
+        <button id="btnViewGraficos">Gráficos</button>
+    </div>
 
-    <!-- Conteúdo -->
-    <section class="content">
-      <!-- Aba Tabelas -->
-      <div id="tabTabelas" class="tab active">
-        <div class="tables-grid">
-          <!-- Recebimentos -->
-          <div class="table-card">
-            <div class="table-header">Recebimentos</div>
-            <table>
-              <thead>
+    <div id="tabTabelas" class="tabelas active">
+
+        <h2>Recebimentos</h2>
+        <table>
+            <thead>
                 <tr>
-                  <th>Data</th>
-                  <th>Descrição</th>
-                  <th class="text-right">Valor</th>
+                    <th>Data</th>
+                    <th>Descrição</th>
+                    <th class="text-right">Valor</th>
                 </tr>
-              </thead>
-              <tbody id="tbodyRecebimentos"></tbody>
-            </table>
-          </div>
+            </thead>
+            <tbody id="tbodyRecebimentos"></tbody>
+        </table>
 
-          <!-- Resumo -->
-          <div class="table-card">
-            <div class="table-header">Resumo diário</div>
-            <table>
-              <thead>
+        <h2>Pagamentos</h2>
+        <table>
+            <thead>
                 <tr>
-                  <th>Data</th>
-                  <th class="text-right">Receb.</th>
-                  <th class="text-right">Pagam.</th>
-                  <th class="text-right">Saldo</th>
+                    <th>Data</th>
+                    <th>Descrição</th>
+                    <th class="text-right">Valor</th>
                 </tr>
-              </thead>
-              <tbody id="tbodyResumo"></tbody>
-            </table>
-          </div>
+            </thead>
+            <tbody id="tbodyPagamentos"></tbody>
+        </table>
 
-          <!-- Pagamentos -->
-          <div class="table-card">
-            <div class="table-header">Pagamentos</div>
-            <table>
-              <thead>
+        <h2>Resumo Diário</h2>
+        <table>
+            <thead>
                 <tr>
-                  <th>Data</th>
-                  <th>Descrição</th>
-                  <th class="text-right">Valor</th>
+                    <th>Data</th>
+                    <th class="text-right">Receb.</th>
+                    <th class="text-right">Pag.</th>
+                    <th class="text-right">Saldo</th>
                 </tr>
-              </thead>
-              <tbody id="tbodyPagamentos"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+            </thead>
+            <tbody id="tbodyResumo"></tbody>
+        </table>
+    </div>
 
-      <!-- Aba Gráficos -->
-      <div id="tabGraficos" class="tab">
-        <div class="charts-grid">
-          <div class="chart-card">
-            <div class="chart-title">Saldo diário</div>
-            <canvas id="chartSaldo"></canvas>
-          </div>
-          <div class="chart-card">
-            <div class="chart-title">Recebimentos x Pagamentos</div>
-            <canvas id="chartRecebPag"></canvas>
-          </div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-title">Composição de pagamentos por categoria</div>
-          <canvas id="chartCategorias"></canvas>
-        </div>
-      </div>
-    </section>
-  </div>
+    <div id="tabGraficos" class="graficos">
 
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <canvas id="chartSaldo"></canvas>
+        <canvas id="chartRecebPag"></canvas>
+        <canvas id="chartCategorias"></canvas>
 
-  <script>
-    // ====== CONFIG DOS LINKS DO GOOGLE SHEETS ======
-    const URL_PAGAMENTOS = "https://docs.google.com/spreadsheets/d/1hJ152Y0470mr-IWjtgiVBC5hIxNCT6WhSgu4qZ4DONc/export?format=csv&gid=0";
-    const URL_RECEBIMENTOS = "https://docs.google.com/spreadsheets/d/1hJ152Y0470mr-IWjtgiVBC5hIxNCT6WhSgu4qZ4DONc/export?format=csv&gid=1132401737";
+    </div>
 
-    let recebimentos = [];
-    let pagamentos = [];
+</div>
 
-    // ====== UTIL ======
-    const formatCurrency = (v) =>
-      v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    const formatDateBr = (iso) => {
-      const d = new Date(iso);
-      if (Number.isNaN(d.getTime())) return iso;
-      return d.toLocaleDateString("pt-BR");
-    };
+<script>
 
-    function atualizarLastUpdate() {
-      const el = document.getElementById("lastUpdate");
-      const agora = new Date();
-      const dataStr = agora.toLocaleDateString("pt-BR");
-      const horaStr = agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-      el.textContent = `${dataStr} ${horaStr}`;
-    }
+// URLs do Google Sheets com PROXY CORS
+const URL_PAGAMENTOS =
+  "https://cors.isomorphic-git.org/https://docs.google.com/spreadsheets/d/1hJ152Y0470mr-IWjtgiVBC5hIxNCT6WhSgu4qZ4DONc/export?format=csv&gid=0";
 
-    // Detecta delimitador principal (, ou ;)
-    function detectarDelimitador(headerLine) {
-      const c = (headerLine.match(/,/g) || []).length;
-      const s = (headerLine.match(/;/g) || []).length;
-      return s > c ? ";" : ",";
-    }
+const URL_RECEBIMENTOS =
+  "https://cors.isomorphic-git.org/https://docs.google.com/spreadsheets/d/1hJ152Y0470mr-IWjtgiVBC5hIxNCT6WhSgu4qZ4DONc/export?format=csv&gid=1132401737";
 
-    // Quebra uma linha CSV respeitando aspas
-    function parseLinhaCSV(line, delimiter) {
-      const result = [];
-      let atual = "";
-      let emAspas = false;
+let recebimentos = [];
+let pagamentos = [];
 
-      for (let i = 0; i < line.length; i++) {
+// --- Funções utilitárias ---
+const formatCurrency = v =>
+  v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+const formatDateBr = (iso) => {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
+    return d.toLocaleDateString("pt-BR");
+};
+
+// --- Detectar delimitador ---
+function detectarDelimitador(headerLine) {
+    const c = (headerLine.match(/,/g) || []).length;
+    const s = (headerLine.match(/;/g) || []).length;
+    return s > c ? ";" : ",";
+}
+
+// --- Parse simples de CSV ---
+function parseLinhaCSV(line, delimiter) {
+    const result = [];
+    let atual = "";
+    let emAspas = false;
+
+    for (let i = 0; i < line.length; i++) {
         const ch = line[i];
 
         if (ch === '"') {
-          if (emAspas && line[i + 1] === '"') {
-            atual += '"';
-            i++;
-          } else {
-            emAspas = !emAspas;
-          }
+            if (emAspas && line[i + 1] === '"') {
+                atual += '"';
+                i++;
+            } else {
+                emAspas = !emAspas;
+            }
         } else if (ch === delimiter && !emAspas) {
-          result.push(atual);
-          atual = "";
+            result.push(atual);
+            atual = "";
         } else {
-          atual += ch;
+            atual += ch;
         }
-      }
-      result.push(atual);
-      return result;
     }
+    result.push(atual);
+    return result;
+}
 
-    function parseCSV(csv) {
-      const linhas = csv.split(/\r?\n/).filter(l => l.trim().length > 0);
-      if (linhas.length === 0) return [];
+function parseCSV(csv) {
+    const linhas = csv.split(/\r?\n/).filter(l => l.trim().length > 0);
+    if (linhas.length === 0) return [];
 
-      const delimiter = detectarDelimitador(linhas[0]);
-      return linhas.map(l => parseLinhaCSV(l, delimiter));
-    }
+    const delimiter = detectarDelimitador(linhas[0]);
+    return linhas.map(l => parseLinhaCSV(l, delimiter));
+}
 
-    // Acha índice de coluna por palavras-chave
-    function encontrarIndice(header, palavras) {
-      return header.findIndex(h =>
-        palavras.some(p => h.includes(p))
-      );
-    }
+// --- Localizar coluna ---
+function encontrarIndice(header, palavras) {
+    return header.findIndex(h => palavras.some(p => h.includes(p)));
+}
 
-    // ====== RECEBIMENTOS: DATA, RECEBER/DESCRIÇÃO, VALOR ======
-    function parseRecebimentos(csv) {
-      const rows = parseCSV(csv);
-      if (rows.length < 2) return [];
+// --- Parser de RECEBIMENTOS ---
+function parseRecebimentos(csv) {
+    const rows = parseCSV(csv);
+    if (rows.length < 2) return [];
 
-      const header = rows[0].map(h => h.trim().toUpperCase());
+    const header = rows[0].map(h => h.trim().toUpperCase());
 
-      const idxData  = encontrarIndice(header, ["DATA"]);
-      const idxDesc  = encontrarIndice(header, ["RECEB", "DESC"]);
-      const idxValor = encontrarIndice(header, ["VALOR"]);
+    const idxData  = encontrarIndice(header, ["DATA"]);
+    const idxDesc  = encontrarIndice(header, ["RECEB", "DESC"]);
+    const idxValor = encontrarIndice(header, ["VALOR"]);
 
-      if (idxData === -1 || idxDesc === -1 || idxValor === -1) {
-        console.warn("Cabeçalhos de RECEBIMENTOS não encontrados. Header:", header);
-        return [];
-      }
+    if (idxData === -1 || idxDesc === -1 || idxValor === -1) return [];
 
-      const resultado = [];
+    const out = [];
 
-      for (let i = 1; i < rows.length; i++) {
+    for (let i = 1; i < rows.length; i++) {
         const cols = rows[i];
         if (!cols[idxData] || !cols[idxValor]) continue;
 
@@ -599,35 +298,32 @@
 
         let dataIso = dataBr;
         if (dataBr.includes("/")) {
-          const [dia, mes, ano] = dataBr.split("/");
-          dataIso = `${ano}-${mes.padStart(2,"0")}-${dia.padStart(2,"0")}`;
+            const [dia, mes, ano] = dataBr.split("/");
+            dataIso = `${ano}-${mes}-${dia}`;
         }
 
-        resultado.push({ data: dataIso, descricao: desc, valor });
-      }
-
-      return resultado;
+        out.push({ data: dataIso, descricao: desc, valor });
     }
 
-    // ====== PAGAMENTOS: DATA, PAGAR/DESCRIÇÃO, VALOR ======
-    function parsePagamentos(csv) {
-      const rows = parseCSV(csv);
-      if (rows.length < 2) return [];
+    return out;
+}
 
-      const header = rows[0].map(h => h.trim().toUpperCase());
+// --- Parser de PAGAMENTOS ---
+function parsePagamentos(csv) {
+    const rows = parseCSV(csv);
+    if (rows.length < 2) return [];
 
-      const idxData  = encontrarIndice(header, ["DATA"]);
-      const idxDesc  = encontrarIndice(header, ["PAGAR", "DESC"]);
-      const idxValor = encontrarIndice(header, ["VALOR"]);
+    const header = rows[0].map(h => h.trim().toUpperCase());
 
-      if (idxData === -1 || idxDesc === -1 || idxValor === -1) {
-        console.warn("Cabeçalhos de PAGAMENTOS não encontrados. Header:", header);
-        return [];
-      }
+    const idxData  = encontrarIndice(header, ["DATA"]);
+    const idxDesc  = encontrarIndice(header, ["PAGAR", "DESC"]);
+    const idxValor = encontrarIndice(header, ["VALOR"]);
 
-      const resultado = [];
+    if (idxData === -1 || idxDesc === -1 || idxValor === -1) return [];
 
-      for (let i = 1; i < rows.length; i++) {
+    const out = [];
+
+    for (let i = 1; i < rows.length; i++) {
         const cols = rows[i];
         if (!cols[idxData] || !cols[idxValor]) continue;
 
@@ -641,234 +337,207 @@
 
         let dataIso = dataBr;
         if (dataBr.includes("/")) {
-          const [dia, mes, ano] = dataBr.split("/");
-          dataIso = `${ano}-${mes.padStart(2,"0")}-${dia.padStart(2,"0")}`;
+            const [dia, mes, ano] = dataBr.split("/");
+            dataIso = `${ano}-${mes}-${dia}`;
         }
 
-        resultado.push({ data: dataIso, descricao: desc, valor });
-      }
-
-      return resultado;
+        out.push({ data: dataIso, descricao: desc, valor });
     }
 
-    // ====== AGRUPAR RESUMO ======
-    function agruparResumoDiario() {
-      const mapa = {};
+    return out;
+}
 
-      recebimentos.forEach(r => {
-        mapa[r.data] = mapa[r.data] || { data: r.data, receb: 0, pag: 0 };
-        mapa[r.data].receb += r.valor;
-      });
+// --- Preencher tabelas ---
+function preencherTabelas() {
+    const tbodyR = document.getElementById("tbodyRecebimentos");
+    const tbodyP = document.getElementById("tbodyPagamentos");
+    const tbodyRes = document.getElementById("tbodyResumo");
 
-      pagamentos.forEach(p => {
-        mapa[p.data] = mapa[p.data] || { data: p.data, receb: 0, pag: 0 };
-        mapa[p.data].pag += p.valor;
-      });
+    tbodyR.innerHTML = "";
+    tbodyP.innerHTML = "";
+    tbodyRes.innerHTML = "";
 
-      const arr = Object.values(mapa).sort((a, b) => a.data.localeCompare(b.data));
-
-      let saldoAcum = 0;
-      arr.forEach(item => {
-        saldoAcum += (item.receb - item.pag);
-        item.saldo = saldoAcum;
-      });
-
-      return arr;
-    }
-
-    // ====== TABELAS ======
-    function preencherTabelas() {
-      const tbodyR = document.getElementById("tbodyRecebimentos");
-      const tbodyP = document.getElementById("tbodyPagamentos");
-      const tbodyRes = document.getElementById("tbodyResumo");
-
-      tbodyR.innerHTML = "";
-      tbodyP.innerHTML = "";
-      tbodyRes.innerHTML = "";
-
-      recebimentos.forEach(r => {
+    recebimentos.forEach(r => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td>${formatDateBr(r.data)}</td>
-          <td>${r.descricao}</td>
-          <td class="text-right">${formatCurrency(r.valor)}</td>
+            <td>${formatDateBr(r.data)}</td>
+            <td>${r.descricao}</td>
+            <td class="text-right">${formatCurrency(r.valor)}</td>
         `;
         tbodyR.appendChild(tr);
-      });
+    });
 
-      pagamentos.forEach(p => {
+    pagamentos.forEach(p => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td>${formatDateBr(p.data)}</td>
-          <td>${p.descricao}</td>
-          <td class="text-right">${formatCurrency(p.valor)}</td>
+            <td>${formatDateBr(p.data)}</td>
+            <td>${p.descricao}</td>
+            <td class="text-right">${formatCurrency(p.valor)}</td>
         `;
         tbodyP.appendChild(tr);
-      });
+    });
 
-      const resumo = agruparResumoDiario();
-      resumo.forEach(item => {
+    const resumo = agruparResumoDiario();
+    resumo.forEach(item => {
         const tr = document.createElement("tr");
-        if (item.saldo < 0) tr.classList.add("saldo-negativo");
         tr.innerHTML = `
-          <td>${formatDateBr(item.data)}</td>
-          <td class="text-right">${formatCurrency(item.receb)}</td>
-          <td class="text-right">${formatCurrency(item.pag)}</td>
-          <td class="text-right">${formatCurrency(item.saldo)}</td>
+            <td>${formatDateBr(item.data)}</td>
+            <td class="text-right">${formatCurrency(item.receb)}</td>
+            <td class="text-right">${formatCurrency(item.pag)}</td>
+            <td class="text-right">${formatCurrency(item.saldo)}</td>
         `;
         tbodyRes.appendChild(tr);
-      });
-    }
+    });
+}
 
-    // ====== CARDS ======
-    function atualizarCards() {
-      const totalReceber = recebimentos.reduce((s, r) => s + r.valor, 0);
-      const totalPagar = pagamentos.reduce((s, p) => s + p.valor, 0);
-      const comprometimento = totalReceber > 0 ? (totalPagar / totalReceber) * 100 : 0;
+// --- Resumo diário ---
+function agruparResumoDiario() {
+    const mapa = {};
 
-      document.getElementById("cardReceber").textContent = formatCurrency(totalReceber);
-      document.getElementById("cardPagar").textContent = formatCurrency(totalPagar);
-      document.getElementById("cardComprometimento").textContent =
-        comprometimento.toFixed(2).replace(".", ",") + "%";
-    }
+    recebimentos.forEach(r => {
+        mapa[r.data] = mapa[r.data] || { data: r.data, receb: 0, pag: 0 };
+        mapa[r.data].receb += r.valor;
+    });
 
-    // ====== GRÁFICOS ======
-    let chartSaldo, chartRecebPag, chartCategorias;
+    pagamentos.forEach(p => {
+        mapa[p.data] = mapa[p.data] || { data: p.data, receb: 0, pag: 0 };
+        mapa[p.data].pag += p.valor;
+    });
 
-    function destruirGraficos() {
-      if (chartSaldo) { chartSaldo.destroy(); chartSaldo = null; }
-      if (chartRecebPag) { chartRecebPag.destroy(); chartRecebPag = null; }
-      if (chartCategorias) { chartCategorias.destroy(); chartCategorias = null; }
-    }
+    const arr = Object.values(mapa).sort((a, b) => a.data.localeCompare(b.data));
 
-    function criarGraficos() {
-      destruirGraficos();
+    let saldo = 0;
+    arr.forEach(item => {
+        saldo += item.receb - item.pag;
+        item.saldo = saldo;
+    });
 
-      const resumo = agruparResumoDiario();
-      const labels = resumo.map(r => formatDateBr(r.data));
-      const saldo = resumo.map(r => r.saldo);
-      const recebVals = resumo.map(r => r.receb);
-      const pagVals = resumo.map(r => r.pag);
+    return arr;
+}
 
-      const ctxSaldo = document.getElementById("chartSaldo").getContext("2d");
-      chartSaldo = new Chart(ctxSaldo, {
+// --- Atualizar cards ---
+function atualizarCards() {
+    const totalReceber = recebimentos.reduce((s, r) => s + r.valor, 0);
+    const totalPagar    = pagamentos.reduce((s, p) => s + p.valor, 0);
+
+    document.getElementById("cardReceber").textContent = formatCurrency(totalReceber);
+    document.getElementById("cardPagar").textContent = formatCurrency(totalPagar);
+    document.getElementById("cardComprometimento").textContent =
+      totalReceber > 0 ? ((totalPagar / totalReceber) * 100).toFixed(2) + "%" : "0%";
+}
+
+// --- Gráficos ---
+let chartSaldo, chartRecebPag, chartCategorias;
+
+function destruirGraficos() {
+    if (chartSaldo) chartSaldo.destroy();
+    if (chartRecebPag) chartRecebPag.destroy();
+    if (chartCategorias) chartCategorias.destroy();
+}
+
+function criarGraficos() {
+    destruirGraficos();
+
+    const resumo = agruparResumoDiario();
+    const labels = resumo.map(r => formatDateBr(r.data));
+
+    // Saldo acumulado
+    chartSaldo = new Chart(document.getElementById("chartSaldo"), {
         type: "line",
         data: {
-          labels,
-          datasets: [{
-            label: "Saldo acumulado",
-            data: saldo,
-            borderWidth: 2,
-            tension: 0.25,
-          }]
-        },
-        options: {
-          plugins: { legend: { labels: { color: "#e5e7eb" } } },
-          scales: {
-            x: { ticks: { color: "#9ca3af" }, grid: { color: "#111827" } },
-            y: { ticks: { color: "#9ca3af" }, grid: { color: "#111827" } }
-          }
+            labels,
+            datasets: [
+                {
+                    label: "Saldo acumulado",
+                    data: resumo.map(r => r.saldo),
+                    borderWidth: 2,
+                    tension: 0.3
+                }
+            ]
         }
-      });
+    });
 
-      const ctxRP = document.getElementById("chartRecebPag").getContext("2d");
-      chartRecebPag = new Chart(ctxRP, {
+    // Recebimentos vs Pagamentos
+    chartRecebPag = new Chart(document.getElementById("chartRecebPag"), {
         type: "bar",
         data: {
-          labels,
-          datasets: [
-            { label: "Recebimentos", data: recebVals, borderWidth: 1 },
-            { label: "Pagamentos", data: pagVals, borderWidth: 1 }
-          ]
-        },
-        options: {
-          plugins: { legend: { labels: { color: "#e5e7eb" } } },
-          scales: {
-            x: { ticks: { color: "#9ca3af" }, grid: { color: "#111827" } },
-            y: { ticks: { color: "#9ca3af" }, grid: { color: "#111827" } }
-          }
+            labels,
+            datasets: [
+                {
+                    label: "Recebimentos",
+                    data: resumo.map(r => r.receb),
+                    borderWidth: 1
+                },
+                {
+                    label: "Pagamentos",
+                    data: resumo.map(r => r.pag),
+                    borderWidth: 1
+                }
+            ]
         }
-      });
+    });
 
-      // categorias = descrição (por enquanto)
-      const categoriasMap = {};
-      pagamentos.forEach(p => {
-        const cat = p.descricao || "Outros";
-        categoriasMap[cat] = (categoriasMap[cat] || 0) + p.valor;
-      });
-      const catLabels = Object.keys(categoriasMap);
-      const catVals = Object.values(categoriasMap);
+    // Categorias pagas
+    const categorias = {};
+    pagamentos.forEach(p => {
+        categorias[p.descricao] = (categorias[p.descricao] || 0) + p.valor;
+    });
 
-      const ctxCat = document.getElementById("chartCategorias").getContext("2d");
-      chartCategorias = new Chart(ctxCat, {
+    chartCategorias = new Chart(document.getElementById("chartCategorias"), {
         type: "doughnut",
         data: {
-          labels: catLabels,
-          datasets: [{
-            data: catVals,
-            borderWidth: 1
-          }]
-        },
-        options: {
-          plugins: {
-            legend: {
-              position: "bottom",
-              labels: { color: "#e5e7eb", boxWidth: 14 }
-            }
-          }
+            labels: Object.keys(categorias),
+            datasets: [
+                {
+                    data: Object.values(categorias),
+                    borderWidth: 1
+                }
+            ]
         }
-      });
-    }
-
-    // ====== TROCA DE ABAS ======
-    const btnViewTabela = document.getElementById("btnViewTabela");
-    const btnViewGraficos = document.getElementById("btnViewGraficos");
-    const tabTabelas = document.getElementById("tabTabelas");
-    const tabGraficos = document.getElementById("tabGraficos");
-    const viewLabel = document.getElementById("viewLabel");
-
-    btnViewTabela.addEventListener("click", () => {
-      btnViewTabela.classList.add("active");
-      btnViewGraficos.classList.remove("active");
-      tabTabelas.classList.add("active");
-      tabGraficos.classList.remove("active");
-      viewLabel.textContent = "Tabelas";
     });
+}
 
-    btnViewGraficos.addEventListener("click", () => {
-      btnViewGraficos.classList.add("active");
-      btnViewTabela.classList.remove("active");
-      tabGraficos.classList.add("active");
-      tabTabelas.classList.remove("active");
-      viewLabel.textContent = "Gráficos";
-    });
+// --- Abas ---
+document.getElementById("btnViewTabela").addEventListener("click", () => {
+    document.getElementById("tabTabelas").classList.add("active");
+    document.getElementById("tabGraficos").classList.remove("active");
 
-    document.getElementById("btnLimpar").addEventListener("click", () => {
-      document.getElementById("filterQuinzena").value = "todas";
-      document.getElementById("filterData").value = "";
-    });
+    document.getElementById("btnViewTabela").classList.add("active");
+    document.getElementById("btnViewGraficos").classList.remove("active");
+});
 
-    // ====== CARREGAR DADOS DO SHEETS ======
-    async function carregarDadosDoSheets() {
-      try {
+document.getElementById("btnViewGraficos").addEventListener("click", () => {
+    document.getElementById("tabGraficos").classList.add("active");
+    document.getElementById("tabTabelas").classList.remove("active");
+
+    document.getElementById("btnViewGraficos").classList.add("active");
+    document.getElementById("btnViewTabela").classList.remove("active");
+
+    criarGraficos();
+});
+
+// --- Carregar dados ---
+async function carregarDados() {
+    try {
         const [csvRec, csvPag] = await Promise.all([
-          fetch(URL_RECEBIMENTOS).then(r => r.text()),
-          fetch(URL_PAGAMENTOS).then(r => r.text())
+            fetch(URL_RECEBIMENTOS).then(r => r.text()),
+            fetch(URL_PAGAMENTOS).then(r => r.text())
         ]);
 
         recebimentos = parseRecebimentos(csvRec);
-        pagamentos  = parsePagamentos(csvPag);
+        pagamentos   = parsePagamentos(csvPag);
 
         preencherTabelas();
         atualizarCards();
-        criarGraficos();
-        atualizarLastUpdate();
-      } catch (e) {
-        console.error("Erro ao carregar dados do Google Sheets:", e);
-      }
-    }
 
-    document.addEventListener("DOMContentLoaded", carregarDadosDoSheets);
-  </script>
+    } catch (err) {
+        console.error("Erro ao buscar dados:", err);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", carregarDados);
+
+</script>
+
 </body>
 </html>
