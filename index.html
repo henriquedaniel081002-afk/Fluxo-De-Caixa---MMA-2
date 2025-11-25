@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fluxo de Caixa - Dashboard</title>
+<title>Fluxo de Caixa • Dashboard</title>
 
 <style>
     body {
@@ -202,153 +202,49 @@
 
 <script>
 
-// URLs do Google Sheets com PROXY CORS
-const URL_PAGAMENTOS =
-  "https://cors.isomorphic-git.org/https://docs.google.com/spreadsheets/d/1hJ152Y0470mr-IWjtgiVBC5hIxNCT6WhSgu4qZ4DONc/export?format=csv&gid=0";
-
-const URL_RECEBIMENTOS =
-  "https://cors.isomorphic-git.org/https://docs.google.com/spreadsheets/d/1hJ152Y0470mr-IWjtgiVBC5hIxNCT6WhSgu4qZ4DONc/export?format=csv&gid=1132401737";
+// URL DA SUA API GOOGLE APPS SCRIPT
+const API_URL = "https://script.google.com/macros/s/AKfycbw1JWxY90mVwqjGrTU8_7cRHfu5dCF6JUShgf-bi74puz0DOsFqBONbjQ1cI8rnV-dA/exec";
 
 let recebimentos = [];
 let pagamentos = [];
 
-// --- Funções utilitárias ---
+// --- Formatação ---
 const formatCurrency = v =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-const formatDateBr = (iso) => {
+const formatDateBr = iso => {
     const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return iso;
     return d.toLocaleDateString("pt-BR");
 };
 
-// --- Detectar delimitador ---
-function detectarDelimitador(headerLine) {
-    const c = (headerLine.match(/,/g) || []).length;
-    const s = (headerLine.match(/;/g) || []).length;
-    return s > c ? ";" : ",";
+// --- Resumo Diário ---
+function agruparResumoDiario() {
+    const mapa = {};
+
+    recebimentos.forEach(r => {
+        mapa[r.data] = mapa[r.data] || { data: r.data, receb: 0, pag: 0 };
+        mapa[r.data].receb += r.valor;
+    });
+
+    pagamentos.forEach(p => {
+        mapa[p.data] = mapa[p.data] || { data: p.data, receb: 0, pag: 0 };
+        mapa[p.data].pag += p.valor;
+    });
+
+    const arr = Object.values(mapa).sort((a,b)=>a.data.localeCompare(b.data));
+
+    let saldo = 0;
+    arr.forEach(item => {
+        saldo += item.receb - item.pag;
+        item.saldo = saldo;
+    });
+
+    return arr;
 }
 
-// --- Parse simples de CSV ---
-function parseLinhaCSV(line, delimiter) {
-    const result = [];
-    let atual = "";
-    let emAspas = false;
-
-    for (let i = 0; i < line.length; i++) {
-        const ch = line[i];
-
-        if (ch === '"') {
-            if (emAspas && line[i + 1] === '"') {
-                atual += '"';
-                i++;
-            } else {
-                emAspas = !emAspas;
-            }
-        } else if (ch === delimiter && !emAspas) {
-            result.push(atual);
-            atual = "";
-        } else {
-            atual += ch;
-        }
-    }
-    result.push(atual);
-    return result;
-}
-
-function parseCSV(csv) {
-    const linhas = csv.split(/\r?\n/).filter(l => l.trim().length > 0);
-    if (linhas.length === 0) return [];
-
-    const delimiter = detectarDelimitador(linhas[0]);
-    return linhas.map(l => parseLinhaCSV(l, delimiter));
-}
-
-// --- Localizar coluna ---
-function encontrarIndice(header, palavras) {
-    return header.findIndex(h => palavras.some(p => h.includes(p)));
-}
-
-// --- Parser de RECEBIMENTOS ---
-function parseRecebimentos(csv) {
-    const rows = parseCSV(csv);
-    if (rows.length < 2) return [];
-
-    const header = rows[0].map(h => h.trim().toUpperCase());
-
-    const idxData  = encontrarIndice(header, ["DATA"]);
-    const idxDesc  = encontrarIndice(header, ["RECEB", "DESC"]);
-    const idxValor = encontrarIndice(header, ["VALOR"]);
-
-    if (idxData === -1 || idxDesc === -1 || idxValor === -1) return [];
-
-    const out = [];
-
-    for (let i = 1; i < rows.length; i++) {
-        const cols = rows[i];
-        if (!cols[idxData] || !cols[idxValor]) continue;
-
-        const dataBr = cols[idxData].trim();
-        const desc   = cols[idxDesc] ? cols[idxDesc].trim() : "";
-        let valorStr = cols[idxValor].trim();
-
-        valorStr = valorStr.replace(/\./g, "").replace(",", ".");
-        const valor = parseFloat(valorStr);
-        if (isNaN(valor)) continue;
-
-        let dataIso = dataBr;
-        if (dataBr.includes("/")) {
-            const [dia, mes, ano] = dataBr.split("/");
-            dataIso = `${ano}-${mes}-${dia}`;
-        }
-
-        out.push({ data: dataIso, descricao: desc, valor });
-    }
-
-    return out;
-}
-
-// --- Parser de PAGAMENTOS ---
-function parsePagamentos(csv) {
-    const rows = parseCSV(csv);
-    if (rows.length < 2) return [];
-
-    const header = rows[0].map(h => h.trim().toUpperCase());
-
-    const idxData  = encontrarIndice(header, ["DATA"]);
-    const idxDesc  = encontrarIndice(header, ["PAGAR", "DESC"]);
-    const idxValor = encontrarIndice(header, ["VALOR"]);
-
-    if (idxData === -1 || idxDesc === -1 || idxValor === -1) return [];
-
-    const out = [];
-
-    for (let i = 1; i < rows.length; i++) {
-        const cols = rows[i];
-        if (!cols[idxData] || !cols[idxValor]) continue;
-
-        const dataBr = cols[idxData].trim();
-        const desc   = cols[idxDesc] ? cols[idxDesc].trim() : "";
-        let valorStr = cols[idxValor].trim();
-
-        valorStr = valorStr.replace(/\./g, "").replace(",", ".");
-        const valor = parseFloat(valorStr);
-        if (isNaN(valor)) continue;
-
-        let dataIso = dataBr;
-        if (dataBr.includes("/")) {
-            const [dia, mes, ano] = dataBr.split("/");
-            dataIso = `${ano}-${mes}-${dia}`;
-        }
-
-        out.push({ data: dataIso, descricao: desc, valor });
-    }
-
-    return out;
-}
-
-// --- Preencher tabelas ---
+// --- Tabelas ---
 function preencherTabelas() {
+
     const tbodyR = document.getElementById("tbodyRecebimentos");
     const tbodyP = document.getElementById("tbodyPagamentos");
     const tbodyRes = document.getElementById("tbodyResumo");
@@ -377,8 +273,7 @@ function preencherTabelas() {
         tbodyP.appendChild(tr);
     });
 
-    const resumo = agruparResumoDiario();
-    resumo.forEach(item => {
+    agruparResumoDiario().forEach(item => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
             <td>${formatDateBr(item.data)}</td>
@@ -390,94 +285,55 @@ function preencherTabelas() {
     });
 }
 
-// --- Resumo diário ---
-function agruparResumoDiario() {
-    const mapa = {};
-
-    recebimentos.forEach(r => {
-        mapa[r.data] = mapa[r.data] || { data: r.data, receb: 0, pag: 0 };
-        mapa[r.data].receb += r.valor;
-    });
-
-    pagamentos.forEach(p => {
-        mapa[p.data] = mapa[p.data] || { data: p.data, receb: 0, pag: 0 };
-        mapa[p.data].pag += p.valor;
-    });
-
-    const arr = Object.values(mapa).sort((a, b) => a.data.localeCompare(b.data));
-
-    let saldo = 0;
-    arr.forEach(item => {
-        saldo += item.receb - item.pag;
-        item.saldo = saldo;
-    });
-
-    return arr;
-}
-
-// --- Atualizar cards ---
+// --- Cards ---
 function atualizarCards() {
-    const totalReceber = recebimentos.reduce((s, r) => s + r.valor, 0);
-    const totalPagar    = pagamentos.reduce((s, p) => s + p.valor, 0);
+    const totalReceber = recebimentos.reduce((s,r)=>s+r.valor,0);
+    const totalPagar   = pagamentos.reduce((s,p)=>s+p.valor,0);
 
     document.getElementById("cardReceber").textContent = formatCurrency(totalReceber);
-    document.getElementById("cardPagar").textContent = formatCurrency(totalPagar);
+    document.getElementById("cardPagar").textContent   = formatCurrency(totalPagar);
     document.getElementById("cardComprometimento").textContent =
-      totalReceber > 0 ? ((totalPagar / totalReceber) * 100).toFixed(2) + "%" : "0%";
+        totalReceber > 0 ? ((totalPagar/totalReceber)*100).toFixed(1)+"%" : "0%";
 }
 
 // --- Gráficos ---
 let chartSaldo, chartRecebPag, chartCategorias;
 
-function destruirGraficos() {
-    if (chartSaldo) chartSaldo.destroy();
-    if (chartRecebPag) chartRecebPag.destroy();
-    if (chartCategorias) chartCategorias.destroy();
-}
-
 function criarGraficos() {
-    destruirGraficos();
 
     const resumo = agruparResumoDiario();
     const labels = resumo.map(r => formatDateBr(r.data));
 
-    // Saldo acumulado
+    if (chartSaldo) chartSaldo.destroy();
+
     chartSaldo = new Chart(document.getElementById("chartSaldo"), {
         type: "line",
         data: {
             labels,
-            datasets: [
-                {
-                    label: "Saldo acumulado",
-                    data: resumo.map(r => r.saldo),
-                    borderWidth: 2,
-                    tension: 0.3
-                }
-            ]
+            datasets: [{
+                label: "Saldo acumulado",
+                data: resumo.map(r=>r.saldo),
+                borderWidth: 2,
+                tension: 0.3
+            }]
         }
     });
 
-    // Recebimentos vs Pagamentos
+    if (chartRecebPag) chartRecebPag.destroy();
+
     chartRecebPag = new Chart(document.getElementById("chartRecebPag"), {
         type: "bar",
         data: {
             labels,
             datasets: [
-                {
-                    label: "Recebimentos",
-                    data: resumo.map(r => r.receb),
-                    borderWidth: 1
-                },
-                {
-                    label: "Pagamentos",
-                    data: resumo.map(r => r.pag),
-                    borderWidth: 1
-                }
+                { label: "Recebimentos", data: resumo.map(r=>r.receb), borderWidth: 1 },
+                { label: "Pagamentos",   data: resumo.map(r=>r.pag),   borderWidth: 1 }
             ]
         }
     });
 
-    // Categorias pagas
+    if (chartCategorias) chartCategorias.destroy();
+
     const categorias = {};
     pagamentos.forEach(p => {
         categorias[p.descricao] = (categorias[p.descricao] || 0) + p.valor;
@@ -487,12 +343,10 @@ function criarGraficos() {
         type: "doughnut",
         data: {
             labels: Object.keys(categorias),
-            datasets: [
-                {
-                    data: Object.values(categorias),
-                    borderWidth: 1
-                }
-            ]
+            datasets: [{
+                data: Object.values(categorias),
+                borderWidth: 1
+            }]
         }
     });
 }
@@ -501,7 +355,6 @@ function criarGraficos() {
 document.getElementById("btnViewTabela").addEventListener("click", () => {
     document.getElementById("tabTabelas").classList.add("active");
     document.getElementById("tabGraficos").classList.remove("active");
-
     document.getElementById("btnViewTabela").classList.add("active");
     document.getElementById("btnViewGraficos").classList.remove("active");
 });
@@ -509,29 +362,24 @@ document.getElementById("btnViewTabela").addEventListener("click", () => {
 document.getElementById("btnViewGraficos").addEventListener("click", () => {
     document.getElementById("tabGraficos").classList.add("active");
     document.getElementById("tabTabelas").classList.remove("active");
-
     document.getElementById("btnViewGraficos").classList.add("active");
     document.getElementById("btnViewTabela").classList.remove("active");
-
     criarGraficos();
 });
 
-// --- Carregar dados ---
+// --- Carregar dados da API ---
 async function carregarDados() {
     try {
-        const [csvRec, csvPag] = await Promise.all([
-            fetch(URL_RECEBIMENTOS).then(r => r.text()),
-            fetch(URL_PAGAMENTOS).then(r => r.text())
-        ]);
+        const dados = await fetch(API_URL).then(r=>r.json());
 
-        recebimentos = parseRecebimentos(csvRec);
-        pagamentos   = parsePagamentos(csvPag);
+        recebimentos = dados.recebimentos;
+        pagamentos   = dados.pagamentos;
 
         preencherTabelas();
         atualizarCards();
 
-    } catch (err) {
-        console.error("Erro ao buscar dados:", err);
+    } catch (e) {
+        console.error("Erro ao buscar dados da API:", e);
     }
 }
 
